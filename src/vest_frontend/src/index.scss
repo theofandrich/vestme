@@ -1,6 +1,73 @@
+:root {
+  /* Primary color - deep blue with teal undertones */
+  --color-primary: #0a2463;
+  --color-primary-light: #1e3a8a;
+  --color-primary-dark: #051c5f;
+  
+  /* Secondary color - teal for fintech credibility */
+  --color-secondary: #3e92cc;
+  --color-secondary-light: #5ba7d9;
+  --color-secondary-dark: #2b78b4;
+  
+  /* Accent color - electric blue for tech edge */
+  --color-accent: #00b4d8;
+  --color-accent-light: #48cae4;
+  --color-accent-dark: #0096c7;
+  
+  /* Success color for confirmations */
+  --color-success: #2dc653;
+  --color-success-light: #4dd66f;
+  --color-success-dark: #25a244;
+  
+  /* Warning color */
+  --color-warning: #ffb400;
+  --color-warning-light: #ffc533;
+  --color-warning-dark: #e6a200;
+  
+  /* Error/danger color */
+  --color-error: #e63946;
+  --color-error-light: #ec5d69;
+  --color-error-dark: #d12334;
+  
+  /* Neutral colors */
+  --color-background: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-text: #2b2d42;
+  --color-text-light: #6c757d;
+  --color-text-dark: #212529;
+  --color-border: #dee2e6;
+
+  /* Font settings */
+  --font-primary: 'Inter', system-ui, sans-serif;
+  --font-secondary: 'DM Sans', sans-serif;
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+}
+
 body {
-  font-family: sans-serif;
+  font-family: var(--font-primary);
   font-size: 1.5rem;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
 }
 
 img {
@@ -20,16 +87,62 @@ form {
   align-items: baseline;
 }
 
+button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  
+  &:hover {
+    background-color: var(--color-primary-light);
+  }
+  
+  &:active {
+    background-color: var(--color-primary-dark);
+  }
+}
+
 button[type="submit"] {
   padding: 5px 20px;
   margin: 10px auto;
   float: right;
+  background-color: var(--color-accent);
+  
+  &:hover {
+    background-color: var(--color-accent-light);
+  }
+  
+  &:active {
+    background-color: var(--color-accent-dark);
+  }
+}
+
+input[type="text"] {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-primary);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 2px var(--color-secondary-light);
+  }
 }
 
 #greeting {
   margin: 10px auto;
   padding: 10px 60px;
-  border: 1px solid #222;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
 }
 
 #greeting:empty {
@@ -38,4 +151,37 @@ button[type="submit"] {
 
 .browser-warning {
   display: none;
+}
+
+/* Auth button component styling */
+.auth-controls {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  margin: var(--space-lg) 0;
+  
+  .auth-button {
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    
+    &.login {
+      background-color: var(--color-secondary);
+      
+      &:hover {
+        background-color: var(--color-secondary-light);
+      }
+    }
+    
+    &.logout {
+      background-color: var(--color-text-light);
+      
+      &:hover {
+        background-color: var(--color-text);
+      }
+    }
+  }
 }
