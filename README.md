@@ -2,6 +2,13 @@
 
 VEST is a decentralized application built on the Internet Computer that enables anyone to create custom vesting schedules and periodic payouts for ICRC-1, ICRC-2, and ICRC-3 compatible tokens.
 
+## Live Deployments
+
+You can access the deployed application through these links:
+
+- **Frontend**: [https://kiw7s-xqaaa-aaaal-asawq-cai.icp0.io/](https://kiw7s-xqaaa-aaaal-asawq-cai.icp0.io/)
+- **Backend** (Candid interface): [https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=kpxzg-2iaaa-aaaal-asawa-cai](https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=kpxzg-2iaaa-aaaal-asawa-cai)
+
 ## Overview
 
 VEST provides token creators and project teams with a secure, transparent mechanism to reward community members, investors, and contributors while implementing strategic token release schedules to promote long-term project stability.

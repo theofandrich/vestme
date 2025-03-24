@@ -1,13 +1,16 @@
 import { AuthClient } from "@dfinity/auth-client";
+import { createAgent } from "@dfinity/utils";
+
+let isLocal = process.env.DFX_NETWORK === "local";
+let host = $state(isLocal ? "http://localhost:4943" : "https://ic0.app");
+
 
 export const auth = $state({
   authClient: null,
   isAuthenticated: false,
   identity: null,
+  agent: null,
 });
-
-
-let isLocal = process.env.DFX_NETWORK === "local";
 
 const getIdentityProvider = () => {
     let idpProvider;
@@ -41,19 +44,23 @@ const defaultOptions = {
 
     loginOptions: {
         identityProvider: getIdentityProvider(),
-        derivationOrigin : isLocal ? "http://localhost:3000" : "https://vestme.xyz",
         maxTimeToLive: BigInt(4) * BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 4 weeks
     },
 };
 
 export const init = async () => {
   const authClient = await AuthClient.create(defaultOptions.createOptions);
-  const isAuthenticated: boolean = await authClient.isAuthenticated();
+  const isAuthenticated = await authClient.isAuthenticated();
       
   auth.authClient = authClient;
   auth.isAuthenticated = isAuthenticated;
   auth.identity = isAuthenticated ? authClient.getIdentity() : null
 
+  auth.agent = await createAgent({ identity: auth.identity, host: host });
+
+  if(isLocal) {
+      await auth.agent.fetchRootKey();
+  }
 }
 
 export const login = async () => {
@@ -63,7 +70,7 @@ export const login = async () => {
           auth.identity = auth.authClient?.getIdentity()
           auth.isAuthenticated = true;
       },
-      onError: (error: any) => {
+      onError: (error) => {
           console.error(error)
       }
   });

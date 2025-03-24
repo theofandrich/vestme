@@ -1,0 +1,5 @@
+[dependencies]
+base = "0.13.7"
+icrc1-types = "1.0.0"
+icrc2-types = "1.1.0"
+vector = "0.4.1"

@@ -1,6 +1,35 @@
 import { Principal } from "@dfinity/principal";
 import type { ApproveArgs, Result_1 } from "$lib/candid/icrc.did";
 
+export const checkAllowance = async (tokenApi: any, backendPID: string, pid: Principal): Promise<boolean> => {
+  console.log("checkAllowance: ", tokenApi, backendPID, pid);
+  try {
+    const args = {
+      account: {
+        owner: pid, // User's principal
+      subaccount: [], // Optional, can be left empty if not using subaccounts
+    },
+    spender: {
+      owner: Principal.fromText(backendPID), // Convert the string to a Principal
+      subaccount: [], // Optional, can be left empty if not using subaccounts
+    },
+  };
+  
+  const result = await tokenApi.icrc2_allowance(args);
+  
+  console.log("allowance: ", result);
+
+  if (result.allowance > 0n) {
+    return true;
+  } else {
+      return await getApproval(tokenApi, backendPID);
+    }
+  } catch (error) {
+    console.error("Unexpected error during checkAllowance:", error);
+    return false;
+  }
+};
+
 export const getApproval = async (tokenApi: any, backendPID: string) => {
     try {
       let args: ApproveArgs = {
