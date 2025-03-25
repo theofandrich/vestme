@@ -38,7 +38,7 @@ actor {
 
     Debug.print("Tokens Received: " # debug_show (caller, amount, tokenCanisterId, periods, durationNS));
 
-    let args : T.VestingUserMapType = {
+    let vestingArgs : T.VestingUserMapType = {
       tokenCanisterId = tokenCanisterId;
       to = to;
       periods = periods;
@@ -50,43 +50,33 @@ actor {
     };
 
     switch (globalMap.get(caller)) {
-
       case (null) {
         let newGlobalMapEntry : T.VestingGlobalMapType = {
-
           user = caller;
-
-          tokens = Vector.make<T.VestingUserMapType>(args);
-
+          tokens = Vector.make<T.VestingUserMapType>(vestingArgs);
         };
-
         globalMap.put(caller, newGlobalMapEntry);
-
       };
-
       case (?userMap) {
-
-        Vector.add(userMap.tokens, args);
-
-        let newUserMap : T.VestingGlobalMapType = {
+        Vector.add(userMap.tokens, vestingArgs);
+        let updatedUserMap : T.VestingGlobalMapType = {
           user = caller;
           tokens = userMap.tokens;
         };
-
-        globalMap.put(caller, newUserMap);
+        globalMap.put(caller, updatedUserMap);
       };
     };
 
-    ignore triggerTimer(args);
+    ignore triggerTimer(vestingArgs);
 
-    return "Successfuly Added";
+    return "Successfully Added";
   };
 
-  func triggerTimer(args : T.VestingUserMapType) : async () {
+  func triggerTimer(vestingArgs : T.VestingUserMapType) : async () {
     ignore setTimer<system>(
-      #nanoseconds(Int.abs(args.periodDuration)),
+      #nanoseconds(Int.abs(vestingArgs.periodDuration)),
       func() : async () {
-        ignore sendTokens(args);
+        ignore sendTokens(vestingArgs);
       },
     );
   };
@@ -97,56 +87,36 @@ actor {
     };
 
     let transferFromArgs : ICRC2.TransferFromArgs = {
-      // the account we want to transfer tokens from
-      from = {
-        owner = userPrincipal;
-        subaccount = null;
-      };
-      // can be used to distinguish between transactions
+      from = { owner = userPrincipal; subaccount = null };
       memo = null;
-      // the amount we want to transfer
       amount = amount;
-      // the subaccount we want to spend the tokens from
       spender_subaccount = null;
-      // if not specified, the default fee for the canister is used
       fee = null;
-      // the account we want to transfer tokens to
-      to = {
-        owner = backendPrincipal;
-        subaccount = null;
-      };
-      // a timestamp indicating when the transaction was created
+      to = { owner = backendPrincipal; subaccount = null };
       created_at_time = null;
     };
 
-    // initiate the transfer
     let transferFromResult = await tokenCanister.icrc2_transfer_from(transferFromArgs);
 
-    // check if the transfer was successful
     switch (transferFromResult) {
       case (#Err(transferError)) {
         return #err("Couldn't transfer funds:\n" # debug_show (transferError));
       };
       case (#Ok(_)) { return #ok(0) };
     };
-
   };
 
-  func sendTokens(args : T.VestingUserMapType) : async () {
-
-    let tokenCanister = actor (args.tokenCanisterId) : actor {
+  func sendTokens(vestingArgs : T.VestingUserMapType) : async () {
+    let tokenCanister = actor (vestingArgs.tokenCanisterId) : actor {
       icrc1_transfer : (ICRC1.TransferArgs) -> async ICRC1.TransferResult;
     };
 
-    let amountToSend = args.amountStarted / args.periods;
+    let amountToSend = vestingArgs.amountStarted / vestingArgs.periods;
 
-    Debug.print("sendTokens: " # debug_show (args));
+    Debug.print("sendTokens: " # debug_show (vestingArgs));
 
     let transferArgs : ICRC1.TransferArgs = {
-      to = {
-        owner = args.to;
-        subaccount = null;
-      };
+      to = { owner = vestingArgs.to; subaccount = null };
       fee = null;
       memo = null;
       from_subaccount = null;
@@ -165,18 +135,18 @@ actor {
       case (#Ok(_)) {};
     };
 
-    Debug.print("sendTokens: " # debug_show (args));
+    Debug.print("sendTokens: " # debug_show (vestingArgs));
 
     let newEntry : T.CompletedVestingEntryType = {
       amountSent = amountToSend;
       timestamp = Time.now();
     };
 
-    Vector.add(args.entries, newEntry);
-    args.amountSent += amountToSend;
+    Vector.add(vestingArgs.entries, newEntry);
+    vestingArgs.amountSent += amountToSend;
 
-    if (Vector.size(args.entries) < args.periods) {
-      ignore triggerTimer(args);
+    if (Vector.size(vestingArgs.entries) < vestingArgs.periods) {
+      ignore triggerTimer(vestingArgs);
     };
   };
 

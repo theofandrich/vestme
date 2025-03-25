@@ -1,11 +1,12 @@
 <script>
+  // Import necessary modules and components
   import { Actor } from "@dfinity/agent";
   import { idlFactory } from "$lib/candid/icrc.did.js";
   import { auth } from "$lib/state/auth.state.svelte";
   import { checkAllowance } from "$lib/services/services";
   import { Principal } from "@dfinity/principal";
-  // Props
 
+  // Props
   let { backendApi, backendCanisterId, onVestingCreated } = $props();
 
   // Token state
@@ -25,6 +26,7 @@
   let vestingError = $state(null);
   let vestingSuccess = $state(false);
 
+  // Validate canister ID
   let isCidValid = $derived.by(() => {
     if (canisterId.length > 10) {
       return Principal.fromText(canisterId).toText() === canisterId;
@@ -40,12 +42,10 @@
   function formatBalance(rawBalance) {
     if (!rawBalance && rawBalance !== 0) return "—";
     const num = Number(rawBalance) / 100000000;
-    let formattedBalance = new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 8,
     }).format(num);
-    console.log("formattedBalance", formattedBalance);
-    return formattedBalance;
   }
 
   // Get token balance

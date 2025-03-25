@@ -1,4 +1,5 @@
 <script>
+  // Import necessary modules and components
   import "../index.scss";
   import { onMount } from "svelte";
   import { init, auth } from "$lib/state/auth.state.svelte";
@@ -41,8 +42,7 @@
 
   // Handle vesting creation to refresh vesting info
   function handleVestingCreated() {
-    // Switch to info view after successful creation
-    activeView = "info";
+    activeView = "info"; // Switch to info view after successful creation
   }
 
   // Copy principal ID to clipboard using a fallback method
@@ -120,7 +120,7 @@
         </div>
       </div>
     {:else}
-      <!-- Simple login prompt, much more compact -->
+      <!-- Simple login prompt -->
       <div class="login-prompt">
         <p>Please sign in to access the vesting application</p>
       </div>

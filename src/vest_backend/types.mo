@@ -32,18 +32,4 @@ module {
         amountSent : Nat;
         timestamp : Int;
     };
-
-    public type TransferError = {
-        GenericError : {
-            message : Text;
-            error_code : Nat;
-        };
-        TemporarilyUnavailable : Null;
-        BadBurn : { min_burn_amount : Nat };
-        Duplicate : { duplicate_of : Nat };
-        BadFee : { expected_fee : Nat };
-        CreatedInFuture : { ledger_time : Nat64 };
-        TooOld : Null;
-        InsufficientFunds : { balance : Nat };
-    };
 };
