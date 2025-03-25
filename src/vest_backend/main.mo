@@ -14,9 +14,10 @@ import ICRC2 "mo:icrc2-types";
 import Vector "mo:vector";
 
 actor {
-  let isLocal = true;
+  let isLocal = false;
+
   let backendPrincipal = if (isLocal) {
-    Principal.fromText("avqkn-guaaa-aaaaa-qaaea-cai");
+    Principal.fromText("by6od-j4aaa-aaaaa-qaadq-cai");
   } else {
     Principal.fromText("kpxzg-2iaaa-aaaal-asawa-cai");
   };
@@ -43,7 +44,7 @@ actor {
       periods = periods;
       periodDuration = durationNS;
       amountStarted = amount;
-      amountSent = 0;
+      var amountSent = 0;
       entries = Vector.new<T.CompletedVestingEntryType>();
       timeStarted = Time.now();
     };
@@ -76,22 +77,24 @@ actor {
       };
     };
 
-    ignore setTimer<system>(
-      #nanoseconds(Int.abs(durationNS)),
-      func() : async () {
-        ignore sendTokens(to, amount / periods, tokenCanisterId, args.entries);
-      },
-    );
+    ignore triggerTimer(args);
 
     return "Successfuly Added";
+  };
+
+  func triggerTimer(args : T.VestingUserMapType) : async () {
+    ignore setTimer<system>(
+      #nanoseconds(Int.abs(args.periodDuration)),
+      func() : async () {
+        ignore sendTokens(args);
+      },
+    );
   };
 
   func takeTokens(userPrincipal : Principal, amount : Nat, tokenCanisterId : Text) : async Result.Result<Nat, Text> {
     let tokenCanister = actor (tokenCanisterId) : actor {
       icrc2_transfer_from : (ICRC2.TransferFromArgs) -> async ICRC2.TransferFromResult;
     };
-
-    Debug.print("takeTokens: " # debug_show (userPrincipal, amount, tokenCanisterId));
 
     let transferFromArgs : ICRC2.TransferFromArgs = {
       // the account we want to transfer tokens from
@@ -119,8 +122,6 @@ actor {
     // initiate the transfer
     let transferFromResult = await tokenCanister.icrc2_transfer_from(transferFromArgs);
 
-    Debug.print("takeTokens: " # debug_show (transferFromResult));
-
     // check if the transfer was successful
     switch (transferFromResult) {
       case (#Err(transferError)) {
@@ -131,36 +132,52 @@ actor {
 
   };
 
-  func sendTokens(to : Principal, amount : Nat, tokenCanisterId : Text, entries : Vector.Vector<T.CompletedVestingEntryType>) : async () {
-    let tokenCanister = actor (tokenCanisterId) : actor {
+  func sendTokens(args : T.VestingUserMapType) : async () {
+
+    let tokenCanister = actor (args.tokenCanisterId) : actor {
       icrc1_transfer : (ICRC1.TransferArgs) -> async ICRC1.TransferResult;
     };
 
+    let amountToSend = args.amountStarted / args.periods;
+
+    Debug.print("sendTokens: " # debug_show (args));
+
     let transferArgs : ICRC1.TransferArgs = {
       to = {
-        owner = to;
+        owner = args.to;
         subaccount = null;
       };
       fee = null;
       memo = null;
       from_subaccount = null;
       created_at_time = null;
-      amount = amount;
+      amount = amountToSend;
     };
 
+    Debug.print("transferArgs: " # debug_show (transferArgs));
+
     let transferResult = await tokenCanister.icrc1_transfer(transferArgs);
+
+    Debug.print("transferResult: " # debug_show (transferResult));
 
     switch (transferResult) {
       case (#Err(_)) {};
       case (#Ok(_)) {};
     };
 
+    Debug.print("sendTokens: " # debug_show (args));
+
     let newEntry : T.CompletedVestingEntryType = {
-      amountSent = amount;
+      amountSent = amountToSend;
       timestamp = Time.now();
     };
 
-    Vector.add(entries, newEntry);
+    Vector.add(args.entries, newEntry);
+    args.amountSent += amountToSend;
+
+    if (Vector.size(args.entries) < args.periods) {
+      ignore triggerTimer(args);
+    };
   };
 
   public shared ({ caller }) func getVestingInfo() : async [T.VestingShareableType] {

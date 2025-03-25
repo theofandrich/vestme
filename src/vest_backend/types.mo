@@ -12,7 +12,7 @@ module {
         periods : Nat;
         periodDuration : Nat;
         amountStarted : Nat;
-        amountSent : Nat;
+        var amountSent : Nat;
         entries : Vector.Vector<CompletedVestingEntryType>;
         timeStarted : Int;
     };

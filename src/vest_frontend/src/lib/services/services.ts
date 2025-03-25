@@ -2,7 +2,6 @@ import { Principal } from "@dfinity/principal";
 import type { ApproveArgs, Result_1 } from "$lib/candid/icrc.did";
 
 export const checkAllowance = async (tokenApi: any, backendPID: string, pid: Principal): Promise<boolean> => {
-  console.log("checkAllowance: ", tokenApi, backendPID, pid);
   try {
     const args = {
       account: {
@@ -17,8 +16,6 @@ export const checkAllowance = async (tokenApi: any, backendPID: string, pid: Pri
   
   const result = await tokenApi.icrc2_allowance(args);
   
-  console.log("allowance: ", result);
-
   if (result.allowance > 0n) {
     return true;
   } else {
@@ -47,8 +44,6 @@ export const getApproval = async (tokenApi: any, backendPID: string) => {
       }
   
       let result: Result_1 = await tokenApi.icrc2_approve(args);
-
-      console.log(result);
       
       if(result.Ok) {
         return true;

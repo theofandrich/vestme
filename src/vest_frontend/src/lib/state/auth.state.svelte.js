@@ -2,7 +2,7 @@ import { AuthClient } from "@dfinity/auth-client";
 import { createAgent } from "@dfinity/utils";
 
 let isLocal = process.env.DFX_NETWORK === "local";
-let host = $state(isLocal ? "http://localhost:4943" : "https://ic0.app");
+let host = $state(isLocal ? "http://localhost:4943" : "https://icp0.io");
 
 
 export const auth = $state({
